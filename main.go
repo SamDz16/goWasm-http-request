@@ -3,6 +3,8 @@ package main
 import (
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 	"syscall/js"
 )
 
@@ -16,6 +18,7 @@ func MyGoFunc() js.Func {
 		// Get the URL as argument
 		// args[0] is a js.Value, so we need to get a string out of it
 		requestUrl := args[0].String()
+		sparqlQuery := args[1].String()
 
 		// Handler for the Promise
 		// We need to return a Promise because HTTP requests are blocking in Go
@@ -26,7 +29,18 @@ func MyGoFunc() js.Func {
 			// Run this code asynchronously
 			go func() {
 				// Make the HTTP request
-				res, err := http.DefaultClient.Get(requestUrl)
+				// res, err := http.DefaultClient.Get(requestUrl)
+				data := url.Values{}
+				data.Set("query", sparqlQuery)
+
+				u, _ := url.ParseRequestURI(requestUrl)
+				urlStr := u.String()
+
+				client := &http.Client{}
+				r, _ := http.NewRequest(http.MethodPost, urlStr, strings.NewReader(data.Encode())) // URL-encoded payload
+				r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+				res, err := client.Do(r)
 				if err != nil {
 					// Handle errors: reject the Promise if we have an error
 					errorConstructor := js.Global().Get("Error")
@@ -37,7 +51,7 @@ func MyGoFunc() js.Func {
 				defer res.Body.Close()
 
 				// Read the response body
-				data, err := ioutil.ReadAll(res.Body)
+				dataBody, err := ioutil.ReadAll(res.Body)
 				if err != nil {
 					// Handle errors here too
 					errorConstructor := js.Global().Get("Error")
@@ -48,8 +62,8 @@ func MyGoFunc() js.Func {
 
 				// "data" is a byte slice, so we need to convert it to a JS Uint8Array object
 				arrayConstructor := js.Global().Get("Uint8Array")
-				dataJS := arrayConstructor.New(len(data))
-				js.CopyBytesToJS(dataJS, data)
+				dataJS := arrayConstructor.New(len(dataBody))
+				js.CopyBytesToJS(dataJS, dataBody)
 
 				// Create a Response object and pass the data
 				responseConstructor := js.Global().Get("Response")
@@ -73,5 +87,6 @@ func main() {
 	c := make(chan int)
 
 	js.Global().Set("MyGoFunc", MyGoFunc())
+
 	<-c
 }
