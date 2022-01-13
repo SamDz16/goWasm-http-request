@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>TinyGo</title>
+	</head>
+	<body>
+		<h1>TinyGO et WebAssembly</h1>
+		<h2><em>Exemple1: ADD function</em></h2>
+		<form id="ex1" action="">
+			<label for="number1">Enter your first number</label> <br />
+			<input type="text" id="number1" placeholder="first number" /> <br />
+			<br />
+			<label for="number2">Enter your second number</label> <br />
+			<input type="text" id="number2" placeholder="second number" /> <br />
+			<br />
+			<button type="submit" id="btn">Add</button>
+		</form>
+		<p>
+			The result is: <b><span id="result"></span></b>
+		</p>
+
+		<hr />
+
+		<h2><em>Exemple2: Hello World!</em></h2>
+		<form id="ex2" action="">
+			<label for="userInput">Enter your string</label> <br />
+			<input id="userInput" type="text" placeholder="your string" /> <br />
+			<br />
+			<button type="submit">Capitalize</button>
+		</form>
+		<p>
+			The string you entered capitalized is:
+			<b
+				><em><span id="capitalized"></span></em
+			></b>
+		</p>
+
+		<script src="wasm_exec.js"></script>
+		<script src="app.js"></script>
+	</body>
+</html>
